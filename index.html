@@ -522,8 +522,8 @@
 
             <!-- Tekst -->
             <div class="text-section">
-                <p>Dit is een <strong>save the date</strong> omdat we jullie er heel graag bij willen hebben. Officiële uitnodiging volgt!</strong></p>
-                <p class="serious-text">✨ De details volgen snel. Zet alvast beide data in je agenda! ✨</p>
+                <p>Dit is een <strong>save the date</strong> omdat we jullie er heel graag bij willen hebben. De officiële uitnodiging volgt.</strong></p>
+                <p class="serious-text">Zet alvast beide data in je agenda!</p>
             </div>
 
             <!-- CTA -->
@@ -542,16 +542,19 @@
     <!-- Modal -->
     <div id="calendarModal" class="modal">
         <div class="modal-content">
-            <div class="modal-title">Kies je agenda</div>
-            <div class="modal-subtitle">Selecteer je agenda-app</div>
+            <div class="modal-title">Welke agenda gebruik je?</div>
             
             <div class="modal-buttons">
                 <button class="modal-btn apple" onclick="addToAppleCalendar()">
-                    <span class="modal-btn-icon">🍎</span>
+                    <svg class="modal-btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                    </svg>
                     Apple Calendar
                 </button>
                 <button class="modal-btn google" onclick="addToGoogleCalendar()">
-                    <span class="modal-btn-icon">🔵</span>
+                    <svg class="modal-btn-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                    </svg>
                     Google Calendar
                 </button>
             </div>
