@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recept Omzetter 👨‍🍳</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Input Section */
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 15px;
+            color: #333;
+        }
+
+        input[type="text"] {
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            flex: 1;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            flex: 0.5;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 14px;
+            width: auto;
+            flex: none;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e0e0e0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Tabs */
+        .tabs {
+            display: none;
+            gap: 0;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .tabs.active {
+            display: flex;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 14px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #999;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* History & Favorites */
+        .history-item,
+        .favorite-item {
+            padding: 14px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-item a,
+        .favorite-item a {
+            color: #667eea;
+            text-decoration: none;
+            flex: 1;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .history-item a:hover,
+        .favorite-item a:hover {
+            text-decoration: underline;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #bbb;
+        }
+
+        /* Recipe View */
+        .recipe-view {
+            display: none;
+        }
+
+        .recipe-view.active {
+            display: block;
+        }
+
+        .recipe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #e0e0e0;
+            gap: 15px;
+        }
+
+        .recipe-title h1 {
+            font-size: 28px;
+            color: #333;
+            line-height: 1.3;
+        }
+
+        .favorite-btn {
+            font-size: 40px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: transform 0.2s;
+        }
+
+        .favorite-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .recipe-section {
+            margin-bottom: 30px;
+        }
+
+        .recipe-section h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+            font-weight: 700;
+        }
+
+        .servings-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            background: #f9f9f9;
+            padding: 12px 15px;
+            border-radius: 10px;
+            width: fit-content;
+        }
+
+        .servings-control button {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            background: white;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 18px;
+            border: 2px solid #667eea;
+        }
+
+        .servings-value {
+            min-width: 100px;
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .time-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .ingredients-list {
+            list-style: none;
+        }
+
+        .ingredients-list li {
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid #667eea;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .step {
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        .step strong {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .back-btn {
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .error-message {
+            padding: 15px;
+            background: #ffe0e0;
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
+            color: #cc0000;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .recipe-title h1 {
+                font-size: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-secondary {
+                flex: 1;
+            }
+
+            .recipe-header {
+                flex-direction: column;
+            }
+
+            .favorite-btn {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>👨‍🍳 Recept Omzetter</h1>
+            <p>Paste een receptlink en wij zetten het om</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+
+            <!-- Error Message -->
+            <div class="error-message" id="errorMessage"></div>
+
+            <!-- Input Section -->
+            <div class="input-section" id="inputSection">
+                <div class="input-group">
+                    <label for="recipeUrl">🔗 Plak hier een receptlink:</label>
+                    <input
+                        type="text"
+                        id="recipeUrl"
+                        placeholder="bijv: https://www.leukerecepten.nl/recepten/nasi-goreng/"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="fetchRecipe()">Omzetten 👨‍🍳</button>
+                    <button class="btn-secondary" onclick="loadDemo()">Demo</button>
+                </div>
+
+                <p style="font-size: 13px; color: #999; margin-top: 10px; text-align: center;">
+                    💡 Werkt met: leukerecepten.nl • allerhande.nl • ah.nl • jumbo.nl • miljuschka.nl en meer!
+                </p>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading" id="loadingSection">
+                <div class="spinner"></div>
+                <p>Recept aan het laden...</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs" id="tabsSection">
+                <button class="tab active" onclick="switchTab(0)">Recept</button>
+                <button class="tab" onclick="switchTab(1)">Geschiedenis</button>
+                <button class="tab" onclick="switchTab(2)">Favorieten</button>
+            </div>
+
+            <!-- Recipe View -->
+            <div class="recipe-view" id="recipeView"></div>
+
+            <!-- History Tab -->
+            <div class="tab-content active" id="historyTab">
+                <div id="historyList"></div>
+                <div class="empty-state" id="historyEmpty" style="display:none;">
+                    <p>📚 Nog geen recepten bekeken</p>
+                </div>
+            </div>
+
+            <!-- Favorites Tab -->
+            <div class="tab-content" id="favoritesTab">
+                <div id="favoritesList"></div>
+                <div class="empty-state" id="favoritesEmpty" style="display:none;">
+                    <p>❤️ Nog geen favorieten</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentRecipe = null;
+        let currentServings = 4;
+
+        // Vercel API URL - zet je eigen Vercel URL hier in na deployment
+        const API_URL = 'https://recept-omzetter.vercel.app/api/extract-recipe';
+
+        // Storage
+        function getHistory() {
+            return JSON.parse(localStorage.getItem('recipeHistory') || '[]');
+        }
+
+        function getFavorites() {
+            return JSON.parse(localStorage.getItem('recipeFavorites') || '[]');
+        }
+
+        function saveHistory(data) {
+            localStorage.setItem('recipeHistory', JSON.stringify(data));
+        }
+
+        function saveFavorites(data) {
+            localStorage.setItem('recipeFavorites', JSON.stringify(data));
+        }
+
+        function showError(msg) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = msg;
+            errorDiv.classList.add('active');
+            setTimeout(() => errorDiv.classList.remove('active'), 5000);
+        }
+
+        // Fetch recipe
+        async function fetchRecipe() {
+            const url = document.getElementById('recipeUrl').value.trim();
+            if (!url) {
+                showError('Voer een URL in');
+                return;
+            }
+
+            document.getElementById('loadingSection').classList.add('active');
+            document.getElementById('inputSection').style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_URL}?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Kon recept niet laden');
+                }
+
+                const recipe = {
+                    name: data.name,
+                    servings: data.servings,
+                    time: data.time,
+                    ingredients: data.ingredients,
+                    prep: data.prep,
+                    cooking: data.cooking,
+                    isFavorite: false
+                };
+
+                displayRecipe(recipe);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loadingSection').classList.remove('active');
+                document.getElementById('inputSection').style.display = 'flex';
+                showError(error.message || 'Kon recept niet laden. Controleer de URL.');
+            }
+        }
+
+        // Display recipe
+        function displayRecipe(recipe) {
+            currentRecipe = recipe;
+            currentServings = recipe.servings;
+
+            // Add to history
+            const history = getHistory();
+            history.unshift({
+                name: recipe.name,
+                recipe: recipe,
+                timestamp: new Date().toISOString()
+            });
+            saveHistory(history.slice(0, 20));
+
+            // Check if favorite
+            const favorites = getFavorites();
+            recipe.isFavorite = favorites.some(f => f.name === recipe.name);
+
+            // Show recipe view
+            document.getElementById('loadingSection').classList.remove('active');
+            document.getElementById('inputSection').style.display = 'none';
+            document.getElementById('tabsSection').classList.add('active');
+
+            renderRecipe();
+            switchTab(0);
+        }
+
+        // Render recipe
+        function renderRecipe() {
+            if (!currentRecipe) return;
+
+            const recipe = currentRecipe;
+            const scale = currentServings / recipe.servings;
+
+            let html = `
+                <div class="recipe-header">
+                    <div class="recipe-title">
+                        <h1>${escapeHtml(recipe.name)}</h1>
+                    </div>
+                    <button class="favorite-btn" onclick="toggleFavorite()" title="Favoriet">
+                        ${recipe.isFavorite ? '❤️' : '🤍'}
+                    </button>
+                </div>
+
+                <div class="recipe-section">
+                    <h2>Ingrediënten</h2>
+                    <div class="servings-control">
+                        <button onclick="changeServings(-1)">−</button>
+                        <span class="servings-value">${currentServings} personen</span>
+                        <button onclick="changeServings(+1)">+</button>
+                    </div>
+                    <div class="time-badge">⏱️ ${recipe.time} minuten</div>
+                    <ul class="ingredients-list">
+            `;
+
+            recipe.ingredients.forEach(ingredient => {
+                const scaled = scaleIngredient(ingredient, scale);
+                html += `<li>${escapeHtml(scaled)}</li>`;
+            });
+
+            html += `
+                    </ul>
+                </div>
+
+                <div class="recipe-section">
+                    <h2>Voorbereiding</h2>
+            `;
+
+            recipe.prep.split('\n').filter(s => s.trim()).forEach(step => {
+                html += `<div class="step">${escapeHtml(step.trim())}</div>`;
+            });
+
+            html += `
+                </div>
+
+                <div class="recipe-section">
+                    <h2>Bereiding</h2>
+            `;
+
+            recipe.cooking.split('\n').filter(s => s.trim()).forEach(step => {
+                let processedStep = escapeHtml(step.trim());
+                // Markeer ingrediënten
+                recipe.ingredients.forEach(ingredient => {
+                    const words = ingredient.split(/[\d\s]+/);
+                    words.forEach(word => {
+                        if (word.length > 2) {
+                            const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                            processedStep = processedStep.replace(regex, `<strong>$&</strong>`);
+                        }
+                    });
+                });
+                html += `<div class="step">${processedStep}</div>`;
+            });
+
+            html += `
+                    <button class="btn-secondary back-btn" onclick="backToInput()">
+                        Nieuw recept
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('recipeView').innerHTML = html;
+            document.getElementById('recipeView').classList.add('active');
+        }
+
+        // Scale ingredient
+        function scaleIngredient(ingredient, scale) {
+            const match = ingredient.match(/^(\d+(?:\.?\d+)?)\s*(.*)$/);
+            if (match) {
+                const amount = (parseFloat(match[1]) * scale).toFixed(1);
+                const unit = match[2];
+                return `${amount}${unit ? ' ' + unit : ''}`;
+            }
+            return ingredient;
+        }
+
+        // Change servings
+        function changeServings(delta) {
+            currentServings = Math.max(1, currentServings + delta);
+            renderRecipe();
+        }
+
+        // Toggle favorite
+        function toggleFavorite() {
+            if (!currentRecipe) return;
+            const favorites = getFavorites();
+            const index = favorites.findIndex(f => f.name === currentRecipe.name);
+
+            if (index > -1) {
+                favorites.splice(index, 1);
+                currentRecipe.isFavorite = false;
+            } else {
+                favorites.unshift({ name: currentRecipe.name, recipe: currentRecipe });
+                currentRecipe.isFavorite = true;
+            }
+
+            saveFavorites(favorites);
+            renderRecipe();
+        }
+
+        // Switch tabs
+        function switchTab(index) {
+            document.querySelectorAll('.tab').forEach((t, i) => {
+                t.classList.toggle('active', i === index);
+            });
+
+            if (index === 0) {
+                document.getElementById('recipeView').classList.add('active');
+                document.getElementById('historyTab').classList.remove('active');
+                document.getElementById('favoritesTab').classList.remove('active');
+            } else if (index === 1) {
+                document.getElementById('recipeView').classList.remove('active');
+                document.getElementById('historyTab').classList.add('active');
+                document.getElementById('favoritesTab').classList.remove('active');
+                updateHistoryList();
+            } else if (index === 2) {
+                document.getElementById('recipeView').classList.remove('active');
+                document.getElementById('historyTab').classList.remove('active');
+                document.getElementById('favoritesTab').classList.add('active');
+                updateFavoritesList();
+            }
+        }
+
+        // Update history
+        function updateHistoryList() {
+            const history = getHistory();
+            const list = document.getElementById('historyList');
+            const empty = document.getElementById('historyEmpty');
+
+            if (history.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            list.innerHTML = history.map((item, i) => `
+                <div class="history-item">
+                    <a onclick="loadFromHistory(${i})">${escapeHtml(item.name)}</a>
+                    <button class="btn-small btn-danger" onclick="deleteFromHistory(${i})">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function loadFromHistory(index) {
+            const history = getHistory();
+            if (history[index]) {
+                displayRecipe(history[index].recipe);
+            }
+        }
+
+        function deleteFromHistory(index) {
+            const history = getHistory();
+            history.splice(index, 1);
+            saveHistory(history);
+            updateHistoryList();
+        }
+
+        // Update favorites
+        function updateFavoritesList() {
+            const favorites = getFavorites();
+            const list = document.getElementById('favoritesList');
+            const empty = document.getElementById('favoritesEmpty');
+
+            if (favorites.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            list.innerHTML = favorites.map((item, i) => `
+                <div class="favorite-item">
+                    <a onclick="loadFromFavorites(${i})">${escapeHtml(item.name)}</a>
+                    <button class="btn-small btn-danger" onclick="deleteFromFavorites(${i})">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function loadFromFavorites(index) {
+            const favorites = getFavorites();
+            if (favorites[index]) {
+                displayRecipe(favorites[index].recipe);
+            }
+        }
+
+        function deleteFromFavorites(index) {
+            const favorites = getFavorites();
+            favorites.splice(index, 1);
+            saveFavorites(favorites);
+            updateFavoritesList();
+        }
+
+        // Back to input
+        function backToInput() {
+            currentRecipe = null;
+            currentServings = 4;
+            document.getElementById('inputSection').style.display = 'flex';
+            document.getElementById('tabsSection').classList.remove('active');
+            document.getElementById('recipeView').classList.remove('active');
+            document.getElementById('recipeUrl').value = '';
+        }
+
+        // Demo recipe
+        function loadDemo() {
+            currentRecipe = {
+                name: 'Spaghetti Carbonara',
+                servings: 4,
+                time: 20,
+                ingredients: [
+                    '400g spaghetti',
+                    '200g pancetta',
+                    '4 eieren',
+                    '100g Pecorino Romano kaas',
+                    'zout en peper naar smaak'
+                ],
+                prep: `Stap 1: Snijd de pancetta in dunne strookjes.
+Stap 2: Rasp de Pecorino Romano kaas fijn.
+Stap 3: Klop de eieren in een kom en meng met geraspte kaas en zout en peper.`,
+                cooking: `Stap 1: Breng water aan de kook in een grote pan en voeg zout toe.
+Stap 2: Kook de spaghetti tot al dente, ongeveer 8-10 minuten, giet af (bewaar 1 kop kookvocht).
+Stap 3: Bak ondertussen de pancetta in een pan tot deze krokant is, ongeveer 5 minuten.
+Stap 4: Haul de pan van het vuur en voeg de warme spaghetti toe.
+Stap 5: Giet het ei-kaas mengsel erbij en schep alles snel door, voeg kookvocht toe tot je de gewenste zacht krijgt.
+Stap 6: Breng op smaak met zout en peper.
+Stap 7: Serveer direct in borden en garneer met extra kaas en peper.`,
+                isFavorite: false
+            };
+            currentServings = 4;
+            displayRecipe(currentRecipe);
+        }
+
+        // Utility
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
