@@ -76,10 +76,8 @@
             color: #333;
         }
 
-        input[type="text"],
-        input[type="number"],
-        textarea {
-            padding: 12px;
+        input[type="text"] {
+            padding: 14px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-size: 16px;
@@ -87,22 +85,14 @@
             transition: border-color 0.2s;
         }
 
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        textarea:focus {
+        input[type="text"]:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
         .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
             gap: 12px;
             margin-top: 10px;
         }
@@ -116,6 +106,7 @@
             cursor: pointer;
             transition: all 0.2s;
             text-align: center;
+            flex: 1;
         }
 
         button:active {
@@ -134,6 +125,7 @@
         .btn-secondary {
             background: #f0f0f0;
             color: #333;
+            flex: 0.5;
         }
 
         .btn-secondary:hover {
@@ -144,11 +136,38 @@
             padding: 6px 12px;
             font-size: 14px;
             width: auto;
+            flex: none;
         }
 
         .btn-danger {
             background: #ff6b6b;
             color: white;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e0e0e0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* Tabs */
@@ -352,6 +371,20 @@
             margin-top: 30px;
         }
 
+        .error-message {
+            padding: 15px;
+            background: #ffe0e0;
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
+            color: #cc0000;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
         @media (max-width: 600px) {
             .container {
                 border-radius: 0;
@@ -371,7 +404,11 @@
             }
 
             .button-group {
-                grid-template-columns: 1fr;
+                flex-direction: column;
+            }
+
+            .btn-secondary {
+                flex: 1;
             }
 
             .recipe-header {
@@ -389,71 +426,41 @@
         <!-- Header -->
         <div class="header">
             <h1>👨‍🍳 Recept Omzetter</h1>
-            <p>Recepten op een duidelijke manier</p>
+            <p>Paste een receptlink en wij zetten het om</p>
         </div>
 
         <!-- Main Content -->
         <div class="content">
 
+            <!-- Error Message -->
+            <div class="error-message" id="errorMessage"></div>
+
             <!-- Input Section -->
             <div class="input-section" id="inputSection">
                 <div class="input-group">
-                    <label for="recipeName">📝 Naam van het recept</label>
+                    <label for="recipeUrl">🔗 Plak hier een receptlink:</label>
                     <input
                         type="text"
-                        id="recipeName"
-                        placeholder="bijv. Spaghetti Carbonara"
+                        id="recipeUrl"
+                        placeholder="bijv: https://www.leukerecepten.nl/recepten/nasi-goreng/"
+                        autocomplete="off"
                     >
-                </div>
-
-                <div class="input-group">
-                    <label for="recipeServings">👥 Aantal personen</label>
-                    <input
-                        type="number"
-                        id="recipeServings"
-                        value="4"
-                        min="1"
-                    >
-                </div>
-
-                <div class="input-group">
-                    <label for="recipeTime">⏱️ Bereidingstijd (minuten)</label>
-                    <input
-                        type="number"
-                        id="recipeTime"
-                        value="30"
-                        min="1"
-                    >
-                </div>
-
-                <div class="input-group">
-                    <label for="recipeIngredients">🥘 Ingrediënten (één per regel)</label>
-                    <textarea
-                        id="recipeIngredients"
-                        placeholder="bijv: 400g pasta&#10;2 eieren&#10;100g pancetta"
-                    ></textarea>
-                </div>
-
-                <div class="input-group">
-                    <label for="recipePrep">🔪 Voorbereiding (Mise en place)</label>
-                    <textarea
-                        id="recipePrep"
-                        placeholder="Beschrijf de voorbereiding stap voor stap..."
-                    ></textarea>
-                </div>
-
-                <div class="input-group">
-                    <label for="recipeCooking">👨‍🍳 Bereiding</label>
-                    <textarea
-                        id="recipeCooking"
-                        placeholder="Beschrijf de bereiding stap voor stap..."
-                    ></textarea>
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-primary" onclick="convertRecipe()">Begin met koken 👨‍🍳</button>
-                    <button class="btn-secondary" onclick="loadDemo()">Demo zien</button>
+                    <button class="btn-primary" onclick="fetchRecipe()">Omzetten 👨‍🍳</button>
+                    <button class="btn-secondary" onclick="loadDemo()">Demo</button>
                 </div>
+
+                <p style="font-size: 13px; color: #999; margin-top: 10px; text-align: center;">
+                    💡 Werkt het niet? Probeer een ander recept of check of het een Nederlands recept is.
+                </p>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading" id="loadingSection">
+                <div class="spinner"></div>
+                <p>Recept aan het laden...</p>
             </div>
 
             <!-- Tabs -->
@@ -507,33 +514,137 @@
             localStorage.setItem('recipeFavorites', JSON.stringify(data));
         }
 
-        // Convert recipe
-        function convertRecipe() {
-            const name = document.getElementById('recipeName').value.trim();
-            if (!name) {
-                alert('Voer een receptnaam in');
+        function showError(msg) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = msg;
+            errorDiv.classList.add('active');
+            setTimeout(() => errorDiv.classList.remove('active'), 5000);
+        }
+
+        // Fetch recipe from URL
+        async function fetchRecipe() {
+            const url = document.getElementById('recipeUrl').value.trim();
+            if (!url) {
+                showError('Voer een URL in');
                 return;
             }
 
-            const recipe = {
-                name: name,
-                servings: parseInt(document.getElementById('recipeServings').value) || 4,
-                time: parseInt(document.getElementById('recipeTime').value) || 30,
-                ingredients: document.getElementById('recipeIngredients').value
-                    .split('\n')
-                    .map(i => i.trim())
-                    .filter(i => i),
-                prep: document.getElementById('recipePrep').value.trim(),
-                cooking: document.getElementById('recipeCooking').value.trim(),
-                isFavorite: false
+            document.getElementById('loadingSection').classList.add('active');
+            document.getElementById('inputSection').style.display = 'none';
+
+            try {
+                // Try multiple CORS proxies
+                const proxies = [
+                    `https://cors-anywhere.herokuapp.com/`,
+                    `https://api.allorigins.win/raw?url=`,
+                ];
+
+                let html = null;
+                for (let proxy of proxies) {
+                    try {
+                        const proxyUrl = proxy.includes('allorigins') ? proxy + encodeURIComponent(url) : proxy + url;
+                        const response = await fetch(proxyUrl, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'text/html'
+                            }
+                        });
+                        if (response.ok) {
+                            html = await response.text();
+                            break;
+                        }
+                    } catch (e) {
+                        console.log('Proxy failed:', e);
+                    }
+                }
+
+                if (!html) {
+                    throw new Error('Kon pagina niet laden');
+                }
+
+                // Try to extract recipe
+                const recipe = extractRecipe(html);
+                if (!recipe) {
+                    throw new Error('Kon geen recept vinden op deze pagina');
+                }
+
+                displayRecipe(recipe);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loadingSection').classList.remove('active');
+                document.getElementById('inputSection').style.display = 'flex';
+                showError(error.message || 'Kon recept niet laden. Probeer een ander recept.');
+            }
+        }
+
+        // Extract recipe from HTML
+        function extractRecipe(html) {
+            // Try JSON-LD first
+            const jsonLdMatch = html.match(/<script[^>]*type="application\/ld\+json"[^>]*>(.*?)<\/script>/is);
+            if (jsonLdMatch) {
+                try {
+                    const data = JSON.parse(jsonLdMatch[1]);
+                    if (data['@type'] === 'Recipe' || data.type === 'Recipe') {
+                        return parseRecipe(data);
+                    }
+                    if (Array.isArray(data)) {
+                        for (let item of data) {
+                            if (item['@type'] === 'Recipe' || item.type === 'Recipe') {
+                                return parseRecipe(item);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.log('JSON-LD parse failed');
+                }
+            }
+
+            return null;
+        }
+
+        // Parse recipe data
+        function parseRecipe(data) {
+            const ingredients = (data.recipeIngredient || [])
+                .filter(i => i && typeof i === 'string')
+                .map(i => i.trim())
+                .filter(i => i);
+
+            if (!ingredients.length) return null;
+
+            const instructions = data.recipeInstructions || [];
+            let prep = '';
+            let cooking = '';
+
+            if (Array.isArray(instructions)) {
+                instructions.forEach((inst, i) => {
+                    const text = inst.text || inst || '';
+                    if (i < Math.ceil(instructions.length / 2)) {
+                        prep += text + '\n';
+                    } else {
+                        cooking += text + '\n';
+                    }
+                });
+            } else if (instructions.text) {
+                cooking = instructions.text;
+            }
+
+            if (!prep) prep = 'Bereid alle ingrediënten voor.';
+            if (!cooking) return null;
+
+            const servings = parseInt(data.recipeYield?.[0]) || 4;
+            const duration = data.totalTime || 'PT30M';
+            const minutes = parseInt(duration.match(/(\d+)M/) ? duration.match(/(\d+)M/)[1] : 30);
+
+            return {
+                name: data.name || 'Recept',
+                servings: servings,
+                time: minutes,
+                ingredients: ingredients,
+                prep: prep.trim(),
+                cooking: cooking.trim(),
+                isFavorite: false,
+                url: data.url || ''
             };
-
-            if (!recipe.ingredients.length || !recipe.prep || !recipe.cooking) {
-                alert('Vul alle velden in');
-                return;
-            }
-
-            displayRecipe(recipe);
         }
 
         // Display recipe
@@ -555,6 +666,7 @@
             recipe.isFavorite = favorites.some(f => f.name === recipe.name);
 
             // Show recipe view
+            document.getElementById('loadingSection').classList.remove('active');
             document.getElementById('inputSection').style.display = 'none';
             document.getElementById('tabsSection').classList.add('active');
 
@@ -603,7 +715,7 @@
                     <h2>Voorbereiding</h2>
             `;
 
-            recipe.prep.split('\n').filter(s => s.trim()).forEach(step => {
+            recipe.prep.split('\n').filter(s => s.trim()).slice(0, 5).forEach(step => {
                 html += `<div class="step">${escapeHtml(step.trim())}</div>`;
             });
 
@@ -618,11 +730,13 @@
                 let processedStep = escapeHtml(step.trim());
                 // Markeer ingrediënten
                 recipe.ingredients.forEach(ingredient => {
-                    const ingredientName = ingredient.split(/[\d\s]+/)[0].trim();
-                    if (ingredientName) {
-                        const regex = new RegExp(`\\b${ingredientName}\\b`, 'gi');
-                        processedStep = processedStep.replace(regex, `<strong>$&</strong>`);
-                    }
+                    const words = ingredient.split(/[\d\s]+/);
+                    words.forEach(word => {
+                        if (word.length > 2) {
+                            const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                            processedStep = processedStep.replace(regex, `<strong>$&</strong>`);
+                        }
+                    });
                 });
                 html += `<div class="step">${processedStep}</div>`;
             });
@@ -773,30 +887,36 @@
             document.getElementById('inputSection').style.display = 'flex';
             document.getElementById('tabsSection').classList.remove('active');
             document.getElementById('recipeView').classList.remove('active');
-            document.getElementById('recipeName').value = '';
-            document.getElementById('recipeServings').value = '4';
-            document.getElementById('recipeTime').value = '30';
-            document.getElementById('recipeIngredients').value = '';
-            document.getElementById('recipePrep').value = '';
-            document.getElementById('recipeCooking').value = '';
+            document.getElementById('recipeUrl').value = '';
         }
 
         // Demo recipe
         function loadDemo() {
-            document.getElementById('recipeName').value = 'Spaghetti Carbonara';
-            document.getElementById('recipeServings').value = '4';
-            document.getElementById('recipeTime').value = '20';
-            document.getElementById('recipeIngredients').value = '400g spaghetti\n200g pancetta\n4 eieren\n100g Pecorino Romano kaas\nzout en peper';
-            document.getElementById('recipePrep').value = `Stap 1: Snijd de pancetta in dunne strookjes.
+            currentRecipe = {
+                name: 'Spaghetti Carbonara',
+                servings: 4,
+                time: 20,
+                ingredients: [
+                    '400g spaghetti',
+                    '200g pancetta',
+                    '4 eieren',
+                    '100g Pecorino Romano kaas',
+                    'zout en peper naar smaak'
+                ],
+                prep: `Stap 1: Snijd de pancetta in dunne strookjes.
 Stap 2: Rasp de Pecorino Romano kaas fijn.
-Stap 3: Klop de eieren in een kom en meng met geraspte kaas.`;
-            document.getElementById('recipeCooking').value = `Stap 1: Kook water aan de kook en voeg zout toe.
-Stap 2: Kook de spaghetti tot al dente, ongeveer 8-10 minuten.
-Stap 3: Bak ondertussen de pancetta in een pan tot deze krokant is.
-Stap 4: Giet de gekookte spaghetti in de pan met pancetta (bewaar wat kookvocht).
-Stap 5: Haul van het vuur en voeg het ei-kaas mengsel toe, schep snel door.
+Stap 3: Klop de eieren in een kom en meng met geraspte kaas en zout en peper.`,
+                cooking: `Stap 1: Breng water aan de kook in een grote pan en voeg zout toe.
+Stap 2: Kook de spaghetti tot al dente, ongeveer 8-10 minuten, giet af (bewaar 1 kop kookvocht).
+Stap 3: Bak ondertussen de pancetta in een pan tot deze krokant is, ongeveer 5 minuten.
+Stap 4: Haul de pan van het vuur en voeg de warme spaghetti toe.
+Stap 5: Giet het ei-kaas mengsel erbij en schep alles snel door, voeg kookvocht toe tot je de gewenste zacht krijgt.
 Stap 6: Breng op smaak met zout en peper.
-Stap 7: Serveer direct in borden.`;
+Stap 7: Serveer direct in borden en garneer met extra kaas en peper.`,
+                isFavorite: false
+            };
+            currentServings = 4;
+            displayRecipe(currentRecipe);
         }
 
         // Utility
